@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+    }
+
+    #game {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      margin: auto;
+      width: 1000px;
+      height: 70vh;
+      overflow: hidden;
+      z-index: 1000;
+    }
+
+    #game2 {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      margin: auto;
+      width: 1000px;
+      height: 70vh;
+      border: 1px solid white;
+      background: rgba(255, 255, 255, 0.1);
+      overflow: hidden;
+    }
+
+    .cathand {
+      cursor: url(./image/貓掌.png) 50 50, auto;
+    }
+
+    .cathand:active {
+      cursor: url(./image/貓掌2.png) 50 50, auto;
+    }
+
+    #game img {
+      height: 150px;
+      position: absolute;
+    }
+
+    .cockroach {
+      z-index: 1000;
+    }
+
+    .cup {
+      z-index: 1000;
+      display: block;
+    }
+
+    #carousel {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+
+    #bg-img {
+      position: absolute;
+    }
+
+    #bg-img img {
+      float: left;
+      width: 100vw;
+    }
+
+    #btn-start {
+      width: 150px;
+      height: 60px;
+      position: absolute;
+      top: 50%;
+      left: 430px;
+      margin: auto;
+      border: 1px white solid;
+      font-size: 24px;
+      font-family: "微軟正黑體";
+      font-weight: bold;
+      color: rgb(255, 255, 255);
+      background: rgba(255, 255, 255, 0);
+      z-index: 1050;
+      cursor: pointer;
+      animation: btn-start 1s infinite linear running;
+    }
+
+
+    @keyframes btn-start {
+      50% {
+        transform: scale(1.1);
+      }
+    }
+
+    .text {
+      position: absolute;
+      top: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 26px;
+      font-family: "微軟正黑體";
+      font-weight: bold;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      width: 300px;
+    }
+
+    .text2 {
+      position: absolute;
+      top: 40px;
+      left: 180px;
+      font-size: 26px;
+      font-family: "微軟正黑體";
+      font-weight: bold;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      width: 100px;
+    }
+
+    #cc {
+      position: relative;
+      top: -30px;
+    }
+
+    #pp {
+      position: relative;
+      top: -5px;
+    }
+
+    #score {
+      position: relative;
+    }
+
+    #time {
+      position: relative;
+    }
+
+    #cat img {
+      height: 600px;
+      position: absolute;
+      left: -350px;
+      bottom: 0;
+      z-index: 50;
+      filter: drop-shadow(-5px 15px 5px rgba(0, 0, 0, 0.8));
+      transform: rotate(-15deg);
+    }
+
+    .catmove {
+      animation: catmove 1.5s infinite linear forwards running;
+      display: block;
+    }
+
+    @keyframes catmove {
+      50% {
+        transform: translate(50px, 50px);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="carousel-bg">
+    <div id="cat">
+      <img src="./image/Catt.png" class="catmove">
+    </div>
+    <div id="bg-img">
+      <img src="./image/shutterstock_1075195811.jpg" alt="">
+      <!-- <img src="./shutterstock_778432729.jpg" alt=""> -->
+    </div>
+    <div class="text2">
+      <img src="./image/蟑螂1.png" width="40%" height="40%" id="cc">
+      <p><span id="score1">0</span></p>
+      <img src="./image/Cup1.png" width="50%" height="50%" id="pp">
+      <p><span id="score2" style="color:red">0</span></p>
+    </div>
+    <div class="text">
+      <p>Score：<span id="score">0</span></p>
+      <p>/</p>
+      <p>Time：<span id="time">20</span>s</p>
+    </div>
+    <div id="game2" class="cathand"></div>
+    <div id="game" class="cathand">
+      <input type="button" value="開始遊戲" id="btn-start" class="startAn">
+    </div>
+  </div>
+  <script src="./jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    // 分數
+    let score = 0
+    let score1 = 0
+    let score2 = 0
+    // 倒數時間
+    let countdown = 15
+    // 計時器
+    let timer = 0
+
+    const move = (cockroach) => {
+      // 隨機移動
+      const top = `${Math.round(Math.random() * 70)}%`
+      const left = `${Math.round(Math.random() * 70)}%`
+      cockroach.stop().animate({
+        top: top,
+        left
+      }, 2000, function () {
+        // 移動完之後遞迴再動一次
+        move(cockroach)
+      })
+    }
+
+    $("#btn-start").click(function () {
+      // 停用開始紐
+      $(this).attr("disabled", true)
+      $(this).css("display", "none")
+      $(".catmove").css("display", "none")
+      // 重設
+      score = 0
+      score1 = 0
+      score2 = 0
+      $("#score").text(score)
+      $("#score1").text(score1)
+      $("#score2").text(score2)
+      countdown = 20
+      $("#time").text(countdown)
+      // 開始遊戲
+      timer = setInterval(function () {
+        // 倒數
+        countdown--
+        $("#time").text(countdown)
+
+        // 隨機產生蟑螂
+        let random = Math.round(Math.random() * 15)
+        if (random > 1 && $("#game .cockroach").length < 15) {
+          // 隨機位置出現，不超過遊戲範圍的上跟左的 70% 範圍
+          const top = `${Math.round(Math.random() * 70)}%`
+          const left = `${Math.round(Math.random() * 70)}%`
+          const cockroach = $(`<img class="cockroach" src="./image/蟑螂-斜.gif" style="top:${top}; left:${left}">`)
+          $("#game").append(cockroach)
+          move(cockroach)
+        }
+
+        // 隨機產生碗盤
+        let random2 = Math.round(Math.random() * 5)
+        if (random2 > 1 && $("#game .cup").length < 5) {
+          // 隨機位置出現，不超過遊戲範圍的上跟左的 70% 範圍
+          const top = `${Math.round(Math.random() * 70)}%`
+          const left = `${Math.round(Math.random() * 70)}%`
+          const cup = $(`<img class="cup" src="./image/Cup1.png" style="top:${top}; left:${left}">`)
+          $("#game").append(cup)
+          move(cup)
+        }
+
+        $(".cockroach").css({
+          // 無法點兩下選取
+          "user-select": "none",
+          // 無法按住拖曳
+          "-webkit-user-drag": "none",
+        })
+
+        $(".cup").css({
+          // 無法點兩下選取
+          "user-select": "none",
+          // 無法按住拖曳
+          "-webkit-user-drag": "none",
+        })
+
+        // 時間到
+        if (countdown <= 0) {
+          clearInterval(timer)
+          $("#game img").remove()
+          $(".catmove").css("display", "block")
+          $("#btn-start").attr("disabled", false)
+          Swal.fire({
+            icon: "info",
+            title: "Time up 時間到!",
+            text: `你總共得到 ${score} 分`
+          })
+          $("#btn-start").attr("value", "再玩一次").css("display", "block")
+        }
+      }, 1000)
+    })
+
+    // 點擊蟑螂變一坨血並加分
+    $("#game").on("click", ".cockroach", function () {
+      $(this).attr("src", "./image/蟑螂3.5.png")
+      $(this).stop()
+      $(this).css({
+        // 無法點兩下選取
+        "user-select": "none",
+        // 無法按住拖曳
+        "-webkit-user-drag": "none",
+        // 忽略點擊事件
+        "pointer-events": "none"
+      })
+      $(this).removeClass("cockroach").addClass("blood")
+      score1++
+      score++
+      $("#score").text(score)
+      $("#score1").text(score1)
+      $(this).delay(2000).hide(0)
+    })
+
+    // 點擊杯子變破杯扣分
+    $("#game").on("click", ".cup", function () {
+      console.log($(this))
+      $(this).attr("src", "./image/Cup3.png")
+      $(this).stop()
+      $(this).css({
+        // 無法點兩下選取
+        "user-select": "none",
+        // 無法按住拖曳
+        "-webkit-user-drag": "none",
+        // 忽略點擊事件
+        "pointer-events": "none"
+      })
+      $(this).removeClass("Cup1").addClass("Cup2")
+      score--
+      score2--
+      $("#score").text(score)
+      $("#score2").text(score2)
+      $(this).delay(2000).hide(0)
+    })
+
+
+
+
+  </script>
+</body>
+
+</html>
